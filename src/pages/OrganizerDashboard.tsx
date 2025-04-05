@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -89,7 +88,7 @@ const OrganizerDashboard = () => {
               date, 
               time, 
               venue_id,
-              venues:venue_id (name),
+              venues(name),
               status,
               created_at
             `)
