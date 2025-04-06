@@ -22,6 +22,35 @@ export interface UserProfile {
   name?: string;
 }
 
+// Define types for Supabase response objects
+interface VenueObject {
+  name: string;
+  location: string;
+  capacity: number;
+}
+
+interface ProfileObject {
+  name: string;
+  email: string;
+}
+
+interface EventWithVenue {
+  id: string;
+  title: string;
+  description: string;
+  date: string;
+  time: string;
+  venue_id: string;
+  status: 'pending' | 'approved' | 'rejected';
+  venues: VenueObject | null;
+  created_at: string;
+}
+
+interface EventWithVenueAndOrganizer extends EventWithVenue {
+  organizer_id: string;
+  profiles: ProfileObject | null;
+}
+
 // Helper function to check if a user is authenticated
 export const isAuthenticated = async () => {
   const { data } = await supabase.auth.getSession();
@@ -97,13 +126,15 @@ export const getApprovedEvents = async () => {
       date, 
       time, 
       venue_id,
+      status,
+      created_at,
       venues:venue_id(name, location, capacity)
     `)
     .eq('status', 'approved');
   
   if (error) throw error;
   
-  return data?.map(event => ({
+  return (data as unknown as EventWithVenue[])?.map(event => ({
     ...event,
     venue_name: event.venues?.name || 'Unknown venue',
     venue_location: event.venues?.location || '',
@@ -122,6 +153,8 @@ export const getPendingEvents = async () => {
       date, 
       time, 
       venue_id,
+      status,
+      created_at,
       venues:venue_id(name, location, capacity),
       organizer_id,
       profiles:organizer_id(name, email)
@@ -130,7 +163,7 @@ export const getPendingEvents = async () => {
   
   if (error) throw error;
   
-  return data?.map(event => ({
+  return (data as unknown as EventWithVenueAndOrganizer[])?.map(event => ({
     ...event,
     venue_name: event.venues?.name || 'Unknown venue',
     organizer_name: event.profiles?.name || 'Unknown organizer',

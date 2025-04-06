@@ -41,6 +41,19 @@ interface VenueData {
   capacity: number;
 }
 
+// Define Supabase response interface
+interface EventResponse {
+  id: any;
+  title: any;
+  description: any;
+  date: any;
+  time: any;
+  venue_id: any;
+  status: 'pending' | 'approved' | 'rejected';
+  created_at: string;
+  venues: { name: string } | null;
+}
+
 const eventFormSchema = z.object({
   title: z.string().min(3, {
     message: "Title must be at least 3 characters.",
@@ -103,12 +116,12 @@ const OrganizerDashboard = () => {
 
           if (eventsError) throw eventsError;
 
-          const formattedEvents = eventsData?.map(event => ({
+          const formattedEvents = (eventsData as EventResponse[] || []).map(event => ({
             ...event,
             venue_name: event.venues?.name || 'Unknown venue',
             status: event.status || 'pending',
             created_at: event.created_at || new Date().toISOString()
-          })) || [];
+          }));
 
           setEvents(formattedEvents);
         }
