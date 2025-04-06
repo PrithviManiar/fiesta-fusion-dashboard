@@ -116,7 +116,8 @@ const OrganizerDashboard = () => {
 
           if (eventsError) throw eventsError;
 
-          const formattedEvents = (eventsData as EventResponse[] || []).map(event => ({
+          // Convert to the right type with the unknown intermediate step
+          const formattedEvents = (eventsData as unknown as EventResponse[] || []).map(event => ({
             ...event,
             venue_name: event.venues?.name || 'Unknown venue',
             status: event.status || 'pending',
