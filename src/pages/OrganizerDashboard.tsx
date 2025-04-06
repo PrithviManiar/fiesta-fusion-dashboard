@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -88,9 +89,7 @@ const OrganizerDashboard = () => {
               date, 
               time, 
               venue_id,
-              venues(name),
-              status,
-              created_at
+              venues(name)
             `)
             .eq('organizer_id', user.id);
 
@@ -98,7 +97,9 @@ const OrganizerDashboard = () => {
 
           const formattedEvents = eventsData?.map(event => ({
             ...event,
-            venue_name: event.venues?.name || 'Unknown venue'
+            venue_name: event.venues ? event.venues.name : 'Unknown venue',
+            status: event.status || 'pending',
+            created_at: event.created_at || new Date().toISOString()
           })) || [];
 
           setEvents(formattedEvents);
