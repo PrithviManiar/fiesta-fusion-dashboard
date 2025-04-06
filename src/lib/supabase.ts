@@ -97,7 +97,7 @@ export const getApprovedEvents = async () => {
       date, 
       time, 
       venue_id,
-      venues(name, location, capacity)
+      venues:venue_id(name, location, capacity)
     `)
     .eq('status', 'approved');
   
@@ -105,9 +105,9 @@ export const getApprovedEvents = async () => {
   
   return data?.map(event => ({
     ...event,
-    venue_name: event.venues ? event.venues.name : 'Unknown venue',
-    venue_location: event.venues ? event.venues.location : '',
-    venue_capacity: event.venues ? event.venues.capacity : 0
+    venue_name: event.venues?.name || 'Unknown venue',
+    venue_location: event.venues?.location || '',
+    venue_capacity: event.venues?.capacity || 0
   })) || [];
 };
 
@@ -122,9 +122,9 @@ export const getPendingEvents = async () => {
       date, 
       time, 
       venue_id,
-      venues(name, location, capacity),
+      venues:venue_id(name, location, capacity),
       organizer_id,
-      profiles(name, email)
+      profiles:organizer_id(name, email)
     `)
     .eq('status', 'pending');
   
@@ -132,8 +132,8 @@ export const getPendingEvents = async () => {
   
   return data?.map(event => ({
     ...event,
-    venue_name: event.venues ? event.venues.name : 'Unknown venue',
-    organizer_name: event.profiles ? event.profiles.name : 'Unknown organizer',
-    organizer_email: event.profiles ? event.profiles.email : ''
+    venue_name: event.venues?.name || 'Unknown venue',
+    organizer_name: event.profiles?.name || 'Unknown organizer',
+    organizer_email: event.profiles?.email || ''
   })) || [];
 };

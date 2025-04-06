@@ -35,6 +35,12 @@ interface Event {
   created_at: string;
 }
 
+interface VenueData {
+  name: string;
+  location: string;
+  capacity: number;
+}
+
 const eventFormSchema = z.object({
   title: z.string().min(3, {
     message: "Title must be at least 3 characters.",
@@ -89,7 +95,9 @@ const OrganizerDashboard = () => {
               date, 
               time, 
               venue_id,
-              venues(name)
+              status,
+              created_at,
+              venues:venue_id(name)
             `)
             .eq('organizer_id', user.id);
 
@@ -97,7 +105,7 @@ const OrganizerDashboard = () => {
 
           const formattedEvents = eventsData?.map(event => ({
             ...event,
-            venue_name: event.venues ? event.venues.name : 'Unknown venue',
+            venue_name: event.venues?.name || 'Unknown venue',
             status: event.status || 'pending',
             created_at: event.created_at || new Date().toISOString()
           })) || [];
