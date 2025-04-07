@@ -12,12 +12,14 @@ const LandingPage = () => {
     title, 
     icon: Icon, 
     description, 
-    loginPath 
+    loginPath,
+    registerPath 
   }: { 
     title: string, 
     icon: React.ElementType, 
     description: string, 
-    loginPath: string 
+    loginPath: string,
+    registerPath: string
   }) => (
     <Card className="hover:shadow-lg transition-all duration-300 hover:scale-105">
       <CardHeader className="items-center">
@@ -26,12 +28,21 @@ const LandingPage = () => {
       </CardHeader>
       <CardContent className="text-center space-y-4">
         <p className="text-muted-foreground">{description}</p>
-        <Button 
-          onClick={() => navigate(loginPath)} 
-          className="w-full"
-        >
-          Login as {title}
-        </Button>
+        <div className="grid grid-cols-2 gap-2">
+          <Button 
+            onClick={() => navigate(registerPath)} 
+            className="w-full"
+            variant="outline"
+          >
+            Register
+          </Button>
+          <Button 
+            onClick={() => navigate(loginPath)} 
+            className="w-full"
+          >
+            Login
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );
@@ -48,18 +59,21 @@ const LandingPage = () => {
             icon={User}
             description="Register for events and view upcoming activities"
             loginPath="/login/student"
+            registerPath="/register/student"
           />
           <UserTypeCard 
             title="Organizer" 
             icon={Users}
             description="Create and manage campus events"
             loginPath="/login/organizer"
+            registerPath="/register/organizer"
           />
           <UserTypeCard 
             title="Admin" 
             icon={UserCog}
             description="Manage venues and event approvals"
             loginPath="/login/admin"
+            registerPath="/register/admin"
           />
         </div>
       </div>
@@ -68,4 +82,3 @@ const LandingPage = () => {
 };
 
 export default LandingPage;
-

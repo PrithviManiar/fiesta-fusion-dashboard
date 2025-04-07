@@ -1,3 +1,4 @@
+
 import { createClient } from '@supabase/supabase-js';
 
 // Provide fallback values for development
@@ -47,6 +48,50 @@ interface EventWithVenueAndOrganizer extends EventWithVenue {
   organizer_id: string;
   profiles: ProfileObject | null;
 }
+
+// User registration function
+export const registerUser = async (email: string, password: string, role: UserRole, name: string): Promise<UserProfile | null> => {
+  try {
+    // 1. Register user with Supabase auth
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+    
+    if (authError) throw authError;
+    if (!authData.user) throw new Error('User registration failed');
+    
+    const userId = authData.user.id;
+    
+    // 2. Create profile record in profiles table
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .insert([
+        { 
+          id: userId, 
+          email, 
+          role, 
+          name 
+        }
+      ]);
+    
+    if (profileError) {
+      // Attempt to clean up the auth user if profile creation fails
+      await supabase.auth.admin.deleteUser(userId);
+      throw profileError;
+    }
+    
+    return {
+      id: userId,
+      email,
+      role,
+      name
+    };
+  } catch (error) {
+    console.error('Registration error:', error);
+    return null;
+  }
+};
 
 // Helper function to check if a user is authenticated
 export const isAuthenticated = async () => {

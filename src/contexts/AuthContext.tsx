@@ -1,7 +1,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase, UserProfile, UserRole } from '@/lib/supabase';
+import { supabase, UserProfile, UserRole, registerUser } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
 
 interface AuthContextType {
@@ -9,6 +9,7 @@ interface AuthContextType {
   loading: boolean;
   signIn: (email: string, password: string, role: UserRole) => Promise<void>;
   signOut: () => Promise<void>;
+  register: (email: string, password: string, role: UserRole, name: string) => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -79,6 +80,35 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
   }, [navigate]);
 
+  const register = async (email: string, password: string, role: UserRole, name: string): Promise<boolean> => {
+    try {
+      setLoading(true);
+      const user = await registerUser(email, password, role, name);
+      
+      if (!user) {
+        throw new Error('Registration failed. Please try again.');
+      }
+      
+      toast({
+        title: "Registration successful",
+        description: `Your account has been created. You can now login.`,
+      });
+      
+      // Navigate to the appropriate login page
+      navigate(`/login/${role}`);
+      return true;
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Registration failed",
+        description: error.message || "An error occurred during registration.",
+      });
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const signIn = async (email: string, password: string, role: UserRole) => {
     try {
       setLoading(true);
@@ -130,7 +160,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     user,
     loading,
     signIn,
-    signOut
+    signOut,
+    register
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
