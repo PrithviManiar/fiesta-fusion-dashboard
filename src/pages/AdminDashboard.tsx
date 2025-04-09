@@ -4,9 +4,28 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar, CheckCircle, XCircle, LogOut } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
 
 const AdminDashboard = () => {
   const { signOut } = useAuth();
+  const { toast } = useToast();
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      toast({
+        title: "Logged out successfully",
+        description: "You have been signed out of your account.",
+      });
+    } catch (error) {
+      console.error("Logout error:", error);
+      toast({
+        variant: "destructive",
+        title: "Logout failed",
+        description: "An error occurred during logout. Please try again.",
+      });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-teal-50 p-8">
@@ -15,7 +34,7 @@ const AdminDashboard = () => {
         <Button 
           variant="outline" 
           className="flex items-center gap-2" 
-          onClick={signOut}
+          onClick={handleLogout}
         >
           <LogOut size={18} />
           Logout
