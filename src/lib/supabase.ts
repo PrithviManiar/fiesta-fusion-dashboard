@@ -1,3 +1,4 @@
+
 import { createClient } from '@supabase/supabase-js';
 
 // We'll use the values from the auto-generated client file
@@ -14,6 +15,49 @@ export interface UserProfile {
   email: string;
   role: UserRole;
   name?: string;
+}
+
+// Define venue type
+interface Venue {
+  id: string;
+  name: string;
+  location: string;
+  capacity: number;
+}
+
+// Define base event type
+interface Event {
+  id: string;
+  title: string;
+  description: string;
+  date: string;
+  time: string;
+  venue_id: string;
+  status: 'pending' | 'approved' | 'rejected';
+  created_at: string;
+  organizer_id?: string;
+}
+
+// Define event with venue info
+export interface EventWithVenue extends Event {
+  venues?: {
+    name: string;
+    location: string;
+    capacity: number;
+  } | null;
+  venue_name: string;
+  venue_location: string;
+  venue_capacity: number;
+}
+
+// Define event with venue and organizer info
+export interface EventWithVenueAndOrganizer extends EventWithVenue {
+  profiles?: {
+    name: string;
+    email: string;
+  } | null;
+  organizer_name: string;
+  organizer_email: string;
 }
 
 // User registration function
