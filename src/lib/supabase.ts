@@ -1,14 +1,10 @@
-
 import { createClient } from '@supabase/supabase-js';
 
-// Provide fallback values for development
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://your-project-url.supabase.co';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'your-anon-key';
+// We'll use the values from the auto-generated client file
+const supabaseUrl = "https://hqmftvdhhnfrgddgsrif.supabase.co";
+const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhxbWZ0dmRoaG5mcmdkZGdzcmlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM4NzUzODEsImV4cCI6MjA1OTQ1MTM4MX0.JxbPKAzOBTkokYvFhrOkc-tmk-6U2q0wSeWwKSVeOUk";
 
-if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
-  console.warn('Supabase URL or Anon Key is missing from environment variables. Using fallback values for development.');
-}
-
+// Use these direct values instead of environment variables which seem to be missing
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export type UserRole = 'student' | 'admin' | 'organizer';
@@ -20,48 +16,29 @@ export interface UserProfile {
   name?: string;
 }
 
-// Define types for Supabase response objects
-interface VenueObject {
-  name: string;
-  location: string;
-  capacity: number;
-}
-
-interface ProfileObject {
-  name: string;
-  email: string;
-}
-
-interface EventWithVenue {
-  id: string;
-  title: string;
-  description: string;
-  date: string;
-  time: string;
-  venue_id: string;
-  status: 'pending' | 'approved' | 'rejected';
-  venues: VenueObject | null;
-  created_at: string;
-}
-
-interface EventWithVenueAndOrganizer extends EventWithVenue {
-  organizer_id: string;
-  profiles: ProfileObject | null;
-}
-
 // User registration function
 export const registerUser = async (email: string, password: string, role: UserRole, name: string): Promise<UserProfile | null> => {
   try {
+    console.log('Starting registration process...');
+    
     // 1. Register user with Supabase auth
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
     });
     
-    if (authError) throw authError;
-    if (!authData.user) throw new Error('User registration failed');
+    if (authError) {
+      console.error('Auth error:', authError);
+      throw authError;
+    }
+    
+    if (!authData.user) {
+      console.error('User registration failed - no user returned');
+      throw new Error('User registration failed');
+    }
     
     const userId = authData.user.id;
+    console.log('User created with ID:', userId);
     
     // 2. Create profile record in profiles table
     const { error: profileError } = await supabase
@@ -69,17 +46,19 @@ export const registerUser = async (email: string, password: string, role: UserRo
       .insert([
         { 
           id: userId, 
-          email, 
-          role, 
-          name 
+          name,
+          role
         }
       ]);
     
     if (profileError) {
-      // Attempt to clean up the auth user if profile creation fails
+      console.error('Profile creation error:', profileError);
+      // Try to clean up the auth user if profile creation fails
       await supabase.auth.admin.deleteUser(userId);
       throw profileError;
     }
+    
+    console.log('Profile created successfully');
     
     return {
       id: userId,
