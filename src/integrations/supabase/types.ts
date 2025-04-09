@@ -84,18 +84,21 @@ export type Database = {
       }
       profiles: {
         Row: {
+          approval_status: string | null
           created_at: string | null
           id: string
           name: string | null
           role: string
         }
         Insert: {
+          approval_status?: string | null
           created_at?: string | null
           id?: string
           name?: string | null
           role: string
         }
         Update: {
+          approval_status?: string | null
           created_at?: string | null
           id?: string
           name?: string | null

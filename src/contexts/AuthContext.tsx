@@ -82,6 +82,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const register = async (email: string, password: string, role: UserRole, name: string): Promise<boolean> => {
     try {
+      // Prevent admin registration
+      if (role === 'admin') {
+        throw new Error('Admin registration is not allowed.');
+      }
+
       setLoading(true);
       const user = await registerUser(email, password, role, name);
       
@@ -89,10 +94,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         throw new Error('Registration failed. Please try again.');
       }
       
-      toast({
-        title: "Registration successful",
-        description: `Your account has been created. You can now login.`,
-      });
+      // For organizer, set initial approval status to 'pending'
+      if (role === 'organizer') {
+        const { error } = await supabase
+          .from('profiles')
+          .update({ approval_status: 'pending' })
+          .eq('id', user.id);
+
+        if (error) throw error;
+
+        toast({
+          title: "Registration pending",
+          description: "Your organizer account is pending admin approval.",
+        });
+      } else {
+        toast({
+          title: "Registration successful",
+          description: `Your account has been created. You can now login.`,
+        });
+      }
       
       // Navigate to the appropriate login page
       navigate(`/login/${role}`);
@@ -112,10 +132,34 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signIn = async (email: string, password: string, role: UserRole) => {
     try {
       setLoading(true);
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+      // Hardcoded admin credentials check
+      if (role === 'admin' && 
+          email !== 'harshit1chandra3@gmail.com' && 
+          password !== 'harshit.prj') {
+        throw new Error('Invalid admin credentials');
+      }
+
+      const { error, data } = await supabase.auth.signInWithPassword({ email, password });
       
       if (error) {
         throw error;
+      }
+
+      // Additional check for organizers - must be approved
+      if (role === 'organizer') {
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('approval_status')
+          .eq('id', data.user?.id)
+          .single();
+
+        if (profileError) throw profileError;
+
+        if (profileData?.approval_status !== 'approved') {
+          await supabase.auth.signOut();
+          throw new Error('Your account is not yet approved. Please contact an administrator.');
+        }
       }
       
       // Navigate to the appropriate dashboard based on user role

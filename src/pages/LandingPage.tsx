@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from 'react-router-dom';
-import { User, Users, UserCog } from 'lucide-react';
+import { User, Users } from 'lucide-react';
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -53,7 +53,7 @@ const LandingPage = () => {
         <h1 className="text-4xl font-bold text-center mb-12 text-primary">
           Campus Event Management System
         </h1>
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-2 gap-8 max-w-2xl mx-auto">
           <UserTypeCard 
             title="Student" 
             icon={User}
@@ -67,13 +67,6 @@ const LandingPage = () => {
             description="Create and manage campus events"
             loginPath="/login/organizer"
             registerPath="/register/organizer"
-          />
-          <UserTypeCard 
-            title="Admin" 
-            icon={UserCog}
-            description="Manage venues and event approvals"
-            loginPath="/login/admin"
-            registerPath="/register/admin"
           />
         </div>
       </div>
